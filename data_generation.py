@@ -46,7 +46,7 @@ if __name__ == "__main__":
         plt.show()
     #save data to npy format. For convention use the row number as data point number
     print(data)
-    np.save("data_close.npy", data)
+    np.save("ds_new.npy", data)
     print("The data have been saved to data.npy")
     
     
