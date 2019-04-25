@@ -34,10 +34,16 @@ class GaussianMixture:
     def __init__(self, data, sigma_min=.1, sigma_max=1, mix=.5):
         mu_min, mu_max=min(data), max(data)
         self.data = data
+        """
         self.one = Gaussian(uniform(mu_min, mu_max), 
                             uniform(sigma_min, sigma_max))
         self.two = Gaussian(uniform(mu_min, mu_max), 
                             uniform(sigma_min, sigma_max))
+        """
+        self.one = Gaussian(uniform(0, 40), 
+                            uniform(0, 2))
+        self.two = Gaussian(uniform(0, 40), 
+                            uniform(0, 2))
         self.mix = mix
 
     def Estep(self):
@@ -54,7 +60,9 @@ class GaussianMixture:
             den = wp1 + wp2
             # normalize
             wp1 /= den
+            #print("post prob 1: {}".format(wp1))
             wp2 /= den
+            #print("post prob 2: {}".format(wp2))
             # posterior probability
             post_prob = wp1 + wp2
             self.labels.append(np.argmax([wp1, wp2]))
@@ -85,7 +93,8 @@ class GaussianMixture:
         for i in range(1, N+1):
             self.Mstep(self.Estep())
             if verbose:
-                print('{0:2} {1}'.format(i, self))
+                print('{0:2} Gaussian 1: {1}'.format(i, self.one))
+                print('{0:2} Gaussian 2: {1}'.format(i, self.two))
         self.Estep() # to freshen up self.loglike
 
     def pdf(self, x):
@@ -118,10 +127,11 @@ class GaussianMixture:
 
 
 if __name__ == "__main__":
+   
     # Find best Mixture Gaussian model
     dloader = Dataloader(sys.argv[1])
     data = dloader.get_unlabeled()
-    n_iterations = 10
+    n_iterations = 30
     best_mix = None
     best_loglike = float('-inf')
     start = time.clock()
@@ -135,10 +145,32 @@ if __name__ == "__main__":
                 best_mix = mix
         except (ZeroDivisionError, ValueError, RuntimeWarning): # Catch division errors from bad starts, and just throw them out...
             pass
-    print('if there are some NaN value please try again')
+    print('if there are some NaN value, please try again')
     print("Two means of models are {} and {}".format(best_mix.one.mu, best_mix.two.mu))
     print("Two stdvars of models are {} and {}".format(best_mix.one.sigma, best_mix.two.sigma))
     data = dloader.get_labeled()
     print("The accuracy is: {}".format(best_mix.eval(data)))
     print("Total running time: {}".format(time.clock()-start))
-    
+    """
+    data = np.array([1,2,3,5,7])
+    n_iterations = 10
+    best_mix = None
+    best_loglike = float('-inf')
+    start = time.clock()
+    print('Computing best model with random restarts...\n')
+    mix = GaussianMixture(data)
+    for _ in range(n_iterations):
+        try:
+            mix.iterate(verbose=True)
+            if mix.loglike > best_loglike:
+                best_loglike = mix.loglike
+                best_mix = mix
+        except (ZeroDivisionError, ValueError, RuntimeWarning): # Catch division errors from bad starts, and just throw them out...
+            pass
+    print('if there are some NaN value please try again')
+    print("Two means of models are {} and {}".format(best_mix.one.mu, best_mix.two.mu))
+    print("Two stdvars of models are {} and {}".format(best_mix.one.sigma, best_mix.two.sigma))
+    #data = dloader.get_labeled()
+    #print("The accuracy is: {}".format(best_mix.eval(data)))
+    print("Total running time: {}".format(time.clock()-start))
+    """

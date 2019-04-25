@@ -42,6 +42,7 @@ class KMeans1D:
                 pts = data[np.nonzero(cluster_table[:, 0].A==cent)[0]]
                 centroids[cent] = np.mean(pts)
                 std_var[cent] = np.std(pts)
+                #print(centroids)
             # stop criterion
             if old_centroids == centroids:
                 break
@@ -72,6 +73,7 @@ class KMeans1D:
             
 # unit test
 if __name__ == "__main__":
+    
     # load dataset generated
     dloader = Dataloader(sys.argv[1])
     # get unlabeled dataset
@@ -79,12 +81,23 @@ if __name__ == "__main__":
     # initialization. The initial point is between max and min of data
     max_data, min_data = np.max(data), np.min(data)
     initial_points = [uniform(min_data, max_data), uniform(min_data, max_data)]
-    print("The initial point is {}".format(initial_points))
+    print("The initial point are {}".format(initial_points))
     start = time.clock()
     km1d = KMeans1D(initial_points)
     data = dloader.get_labeled()
     print("The accuracy is: {}".format(km1d.eval(data)))
     print("Total running time is {}".format(time.clock() - start))
-
+    print("If the result is far from 1.0. It means that the random number is too strange. Please re-run this program")
+    """
+    data = np.array([1,2,3,5,7])
+    # initialization. The initial point is between max and min of data
+    max_data, min_data = np.max(data), np.min(data)
+    initial_points = [uniform(min_data, max_data), uniform(min_data, max_data)]
+    print("The initial point is {}".format(initial_points))
+    start = time.clock()
+    km1d = KMeans1D(initial_points)
+    km1d.cluster(data)
+    print("Total running time is {}".format(time.clock() - start))
+    """
     
     
