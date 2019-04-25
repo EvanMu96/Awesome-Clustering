@@ -1,3 +1,8 @@
 
 *.npy
 .DS_Store
+gmm_by_sCao.py
+*.ipynb
+*.pyc
+*.pyc
+gene_iter.py

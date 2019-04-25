@@ -10,7 +10,14 @@ class Dataloader:
         self.data = np.load(data_path)
     
     def get_unlabeled(self):
-        return self.data[:, 0]
+        return self.data[:, 0].reshape((self.data.shape[0], 1))
 
     def get_labeled(self):
         return self.data
+
+if __name__ == "__main__":
+    dloader = Dataloader("data.npy")
+    data = dloader.get_labeled()
+    print(data.shape, ' labeled')
+    data = dloader.get_unlabeled()
+    print(data.shape, ' unlabeled')
