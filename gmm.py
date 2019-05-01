@@ -90,11 +90,13 @@ class GaussianMixture:
 
     def iterate(self, N=1, verbose=False):
         "Perform N iterations, then compute log-likelihood"
-        for i in range(1, N+1):
+        n = 0
+        while n < N:
             self.Mstep(self.Estep())
             if verbose:
                 print('{0:2} Gaussian 1: {1}'.format(i, self.one))
                 print('{0:2} Gaussian 2: {1}'.format(i, self.two))
+            n += 1
         self.Estep() # to freshen up self.loglike
 
     def pdf(self, x):
@@ -108,11 +110,15 @@ class GaussianMixture:
         for i in range(n):
             if p_labels[i] == gt_labels[i]:
                 corr += 1
+        if n == 0:
+            print("Random Error. Please run again!")
+            exit()
         if corr/n < 0.5:
             return 1 - corr/n
         else:
             return corr/n
-     
+
+
     def __repr__(self):
         return 'GaussianMixture({0}, {1}, mix={2.03})'.format(self.one, 
                                                               self.two, 
@@ -123,8 +129,20 @@ class GaussianMixture:
                                                         self.two, 
                                                         self.mix)
         
-
-
+    def write_results(self):
+        cluster1 = []
+        cluster2 = []
+        p_labels = self.labels
+        n = len(p_labels)
+        for i in range(n):
+            if p_labels[i] == 0:
+                cluster1.append(str(data[i][0])+'\n')
+            else:
+                cluster2.append(str(data[i][0])+'\n')
+        f1 = open("cluster_gmm1.txt", 'w')
+        f2 = open("cluster_gmm2.txt", 'w')
+        f1.writelines(cluster1)
+        f2.writelines(cluster2)
 
 if __name__ == "__main__":
    
@@ -132,11 +150,11 @@ if __name__ == "__main__":
     dloader = Dataloader(sys.argv[1])
     data = dloader.get_unlabeled()
     n_iterations = 30
-    best_mix = None
+    mix = GaussianMixture(data)
+    best_mix = mix
     best_loglike = float('-inf')
     start = time.clock()
     print('Computing best model with random restarts...\n')
-    mix = GaussianMixture(data)
     for _ in range(n_iterations):
         try:
             mix.iterate()
@@ -148,9 +166,11 @@ if __name__ == "__main__":
     print('if there are some NaN value, please try again')
     print("Two means of models are {} and {}".format(best_mix.one.mu, best_mix.two.mu))
     print("Two stdvars of models are {} and {}".format(best_mix.one.sigma, best_mix.two.sigma))
+    end = time.clock()
+    best_mix.write_results()
     data = dloader.get_labeled()
     print("The accuracy is: {}".format(best_mix.eval(data)))
-    print("Total running time: {}".format(time.clock()-start))
+    print("Total running time: {}".format(end - start))
     """
     data = np.array([1,2,3,5,7])
     n_iterations = 10

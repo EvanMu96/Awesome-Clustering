@@ -50,16 +50,17 @@ class KMeans1D:
         for cent in range(2):
             print("Cluster {0}: the mean is {1}, the standard var is {2}".format(cent, centroids[cent], std_var[cent]))
 
+        self.cls_table = cluster_table
         return centroids, cluster_table
     
     # predict as a classification task
-    def _predict_label(self, data):
-        _, cls_table = self.cluster(data)
-        return cls_table[:, 0]
+    def _predict_label(self):
+        return self.cls_table[:, 0]
 
     # calculate accuracy
+    # this data should be labeled
     def eval(self, data):
-        p_labels = self._predict_label(data[:, 0])
+        p_labels = self._predict_label()
         gt_labels = data[:, 1]
         corr = 0
         n = p_labels.shape[0]
@@ -70,6 +71,24 @@ class KMeans1D:
             return 1 - corr/n
         else:
             return corr/n
+
+    # write results to files
+    def write_results(self, data):
+        cluster1 = []
+        cluster2 = []
+        p_labels = self._predict_label()
+        n = p_labels.shape[0]
+        for i in range(n):
+            if p_labels[i] == [0]:
+                cluster1.append(str(data[i][0])+'\n')
+            else:
+                cluster2.append(str(data[i][0])+'\n')
+        f1 = open("cluster_kms1.txt", 'w')
+        f2 = open("cluster_kms2.txt", 'w')
+        f1.writelines(cluster1)
+        f2.writelines(cluster2)
+
+
             
 # unit test
 if __name__ == "__main__":
@@ -84,11 +103,15 @@ if __name__ == "__main__":
     print("The initial point are {}".format(initial_points))
     start = time.clock()
     km1d = KMeans1D(initial_points)
+    km1d.cluster(data)
+    end = time.clock()
+    km1d.write_results(data)
     data = dloader.get_labeled()
     print("The accuracy is: {}".format(km1d.eval(data)))
-    print("Total running time is {}".format(time.clock() - start))
-    print("If the result is far from 1.0. It means that the random number is too strange. Please re-run this program")
+    print("Total running time is {}".format(end - start))
+    print("If the result is far from the report. It means that the random number is too strange. Please re-run this program")
     """
+
     data = np.array([1,2,3,5,7])
     # initialization. The initial point is between max and min of data
     max_data, min_data = np.max(data), np.min(data)
